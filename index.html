@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Formación trak · onboarding para fisioterapeutas</title>
+<meta name="description" content="Onboarding de trak para fisioterapeutas. movement therapy." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --teal:#315B5A;        /* criterio clínico / confianza */
+  --teal-700:#274847;
+  --teal-900:#1d3a39;
+  --teal-200:#CCEBEB;    /* cercanía / acompañamiento */
+  --teal-100:#E6F7F5;
+  --cyan:#B8FFFF;
+  --accent:#FFFCAB;      /* CTA / innovación */
+  --accent-100:#FFFEE9;
+  --ink:#21302f;
+  --muted:#5d706f;
+  --bg:#FBFEFD;
+  --white:#ffffff;
+  --ok:#2f8a6f;
+  --err:#c0563f;
+  --radius:16px;
+  --shadow:0 1px 2px rgba(31,58,57,.04),0 8px 30px rgba(31,58,57,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;
+  color:var(--ink); background:var(--bg);
+  -webkit-font-smoothing:antialiased; line-height:1.55;
+}
+h1,h2,h3,h4,.brandfont{font-family:'Geist','Manrope',sans-serif;letter-spacing:-.01em;color:var(--teal-900)}
+a{color:var(--teal)}
+button{font-family:inherit;cursor:pointer}
+.btn{
+  border:none;border-radius:999px;padding:12px 22px;font-weight:700;font-size:15px;
+  background:var(--teal);color:#fff;transition:transform .05s ease,filter .15s ease;
+}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(1px)}
+.btn.cta{background:var(--accent);color:var(--teal-900)}
+.btn.ghost{background:transparent;color:var(--teal);border:1.5px solid var(--teal-200)}
+.btn.ghost:hover{background:var(--teal-100)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.btn.sm{padding:8px 16px;font-size:14px}
+.hidden{display:none !important}
+
+/* ---------- LOGO ---------- */
+.logo{display:flex;align-items:center;gap:10px}
+.logo .word{font-family:'Geist',sans-serif;font-weight:600;font-size:22px;color:var(--teal-900);letter-spacing:-.02em}
+.logo .tag{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.02em}
+
+/* ---------- AUTH ---------- */
+.auth-wrap{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr}
+.auth-hero{
+  background:
+    radial-gradient(1200px 600px at 10% -10%, var(--cyan) 0%, transparent 55%),
+    radial-gradient(900px 700px at 110% 120%, var(--accent) 0%, transparent 50%),
+    linear-gradient(160deg,var(--teal) 0%,var(--teal-900) 100%);
+  color:#eafaf8;padding:54px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden
+}
+.auth-hero .logo .word{color:#fff}
+.auth-hero .logo .tag{color:#bfeae6}
+.auth-hero h1{color:#fff;font-size:40px;line-height:1.08;margin:0 0 16px;max-width:15ch}
+.auth-hero p{color:#d8f3f0;font-size:17px;max-width:42ch;margin:0 0 10px}
+.hero-quote{margin-top:26px;padding:18px 20px;border-radius:14px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);max-width:46ch}
+.hero-quote b{color:#fff}
+.hero-foot{font-size:13px;color:#bfeae6}
+.auth-card{display:flex;align-items:center;justify-content:center;padding:40px}
+.card{background:var(--white);border:1px solid var(--teal-200);border-radius:var(--radius);box-shadow:var(--shadow)}
+.auth-box{width:100%;max-width:400px;padding:34px}
+.auth-box h2{margin:0 0 4px;font-size:24px}
+.auth-box .sub{color:var(--muted);font-size:14px;margin:0 0 22px}
+.tabs{display:flex;background:var(--teal-100);border-radius:999px;padding:4px;margin-bottom:22px}
+.tabs button{flex:1;border:none;background:transparent;padding:9px;border-radius:999px;font-weight:700;font-size:14px;color:var(--muted)}
+.tabs button.on{background:#fff;color:var(--teal-900);box-shadow:0 1px 4px rgba(31,58,57,.12)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--teal-900);margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;border:1.5px solid var(--teal-200);border-radius:12px;font-size:15px;font-family:inherit;background:#fff}
+.field input:focus{outline:none;border-color:var(--teal)}
+.msg{font-size:13.5px;padding:10px 12px;border-radius:10px;margin-bottom:12px}
+.msg.err{background:#fdeee9;color:var(--err)}
+.msg.ok{background:#e9f6f0;color:var(--ok)}
+.full{width:100%;justify-content:center;display:flex}
+
+/* ---------- APP ---------- */
+.app{display:none;min-height:100vh}
+.topbar{
+  position:sticky;top:0;z-index:30;background:rgba(251,254,253,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--teal-200);display:flex;align-items:center;gap:18px;padding:12px 22px
+}
+.topbar .spacer{flex:1}
+.progress-mini{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);font-weight:600}
+.bar{width:160px;height:8px;background:var(--teal-200);border-radius:999px;overflow:hidden}
+.bar > i{display:block;height:100%;width:0;background:var(--teal);border-radius:999px;transition:width .4s ease}
+.usermenu{position:relative}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--teal);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;border:none;font-family:'Geist'}
+.menu{position:absolute;right:0;top:46px;background:#fff;border:1px solid var(--teal-200);border-radius:14px;box-shadow:var(--shadow);min-width:210px;padding:8px;display:none}
+.menu.open{display:block}
+.menu .who{padding:10px 12px;border-bottom:1px solid var(--teal-100);margin-bottom:6px}
+.menu .who b{display:block;font-size:14px;color:var(--teal-900)}
+.menu .who span{font-size:12px;color:var(--muted)}
+.menu button{width:100%;text-align:left;border:none;background:transparent;padding:10px 12px;border-radius:10px;font-size:14px;color:var(--ink);font-weight:600}
+.menu button:hover{background:var(--teal-100)}
+
+.layout{display:grid;grid-template-columns:300px 1fr;align-items:start;max-width:1240px;margin:0 auto}
+.sidebar{position:sticky;top:61px;align-self:start;height:calc(100vh - 61px);overflow-y:auto;padding:20px 14px;border-right:1px solid var(--teal-200)}
+.sec-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin:18px 10px 8px}
+.unit-link{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:11px;cursor:pointer;font-size:14px;color:var(--teal-900);font-weight:600;line-height:1.25}
+.unit-link:hover{background:var(--teal-100)}
+.unit-link.on{background:var(--teal-100);box-shadow:inset 3px 0 0 var(--teal)}
+.tick{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--teal-200);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.tick.done{background:var(--teal);border-color:var(--teal)}
+.unit-link small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+
+.main{padding:34px 40px 80px;min-width:0}
+.crumbs{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.main h2.unit-h{font-size:30px;margin:0 0 6px;line-height:1.12}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--teal-100);color:var(--teal);margin-bottom:18px}
+.pill.video{background:#fff4d6;color:#9a7b00}
+.pill.task{background:var(--accent-100);color:#8a7a00}
+.content{font-size:16px;color:var(--ink);max-width:760px}
+.content h3{font-size:19px;margin:26px 0 8px}
+.content h4{font-size:16px;margin:18px 0 6px;color:var(--teal-700)}
+.content p{margin:10px 0}
+.content ul{margin:10px 0;padding-left:0;list-style:none}
+.content ul li{position:relative;padding:6px 0 6px 26px}
+.content ul li::before{content:"";position:absolute;left:4px;top:13px;width:9px;height:9px;border-radius:50%;background:var(--teal-200);box-shadow:0 0 0 3px var(--teal-100)}
+.content strong{color:var(--teal-900)}
+.callout{background:var(--accent-100);border:1px solid #f0eab0;border-radius:14px;padding:16px 18px;margin:20px 0}
+.callout.key{background:var(--teal);color:#eafaf8;border:none}
+.callout.key strong{color:#fff}
+.callout .lab{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;opacity:.85}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}
+.minicard{background:#fff;border:1px solid var(--teal-200);border-radius:14px;padding:16px}
+.minicard b{display:block;color:var(--teal-900);margin-bottom:4px}
+.minicard span{font-size:14px;color:var(--muted)}
+.videobox{background:linear-gradient(160deg,var(--teal),var(--teal-900));color:#eafaf8;border-radius:16px;padding:26px;margin:18px 0;display:flex;gap:18px;align-items:center}
+.videobox .play{flex:none;width:56px;height:56px;border-radius:50%;background:var(--accent);color:var(--teal-900);display:flex;align-items:center;justify-content:center;font-size:22px}
+.videobox b{color:#fff;font-size:17px}
+.videobox span{font-size:14px;color:#cfeeea}
+
+/* quiz */
+.quiz{background:#fff;border:1px solid var(--teal-200);border-radius:16px;padding:20px;margin:24px 0}
+.quiz .q{font-weight:700;color:var(--teal-900);margin-bottom:12px;font-size:16px}
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--teal-200);background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:9px;font-size:15px;color:var(--ink);font-weight:600;transition:.12s}
+.opt:hover{border-color:var(--teal)}
+.opt.correct{background:#e9f6f0;border-color:var(--ok);color:#1f6b54}
+.opt.wrong{background:#fdeee9;border-color:var(--err);color:var(--err)}
+.opt.dim{opacity:.55}
+.quiz .fb{font-size:14px;margin-top:8px;padding:10px 12px;border-radius:10px;display:none}
+.quiz .fb.show{display:block}
+.quiz .fb.good{background:#e9f6f0;color:#1f6b54}
+.quiz .fb.bad{background:#fdeee9;color:var(--err)}
+
+.unit-foot{display:flex;align-items:center;gap:12px;margin-top:38px;padding-top:22px;border-top:1px solid var(--teal-200);max-width:760px}
+.unit-foot .spacer{flex:1}
+
+/* certificate / modals */
+.overlay{position:fixed;inset:0;background:rgba(29,58,57,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px;max-width:560px;width:100%;padding:34px;box-shadow:0 30px 80px rgba(0,0,0,.3);max-height:90vh;overflow:auto}
+.modal h3{font-size:24px;margin:0 0 8px}
+.modal p{color:var(--muted)}
+.celebrate{width:74px;height:74px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 14px}
+
+/* admin */
+.adminwrap{max-width:1100px;margin:0 auto;padding:30px 24px 70px}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:18px 0 26px}
+.stat{background:#fff;border:1px solid var(--teal-200);border-radius:16px;padding:18px}
+.stat .n{font-family:'Geist';font-size:30px;color:var(--teal-900);font-weight:600}
+.stat .l{font-size:13px;color:var(--muted);font-weight:600}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--teal-200);border-radius:16px;overflow:hidden}
+th,td{text-align:left;padding:12px 14px;font-size:14px;border-bottom:1px solid var(--teal-100)}
+th{background:var(--teal-100);color:var(--teal-900);font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+.badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
+.badge.done{background:#e9f6f0;color:#1f6b54}
+.badge.prog{background:var(--accent-100);color:#8a7a00}
+.badge.none{background:#f1f4f4;color:var(--muted)}
+
+@media(max-width:860px){
+  .auth-wrap{grid-template-columns:1fr}
+  .auth-hero{display:none}
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--teal-200)}
+  .main{padding:24px 18px 70px}
+  .bar{width:90px}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= AUTH ================= -->
+<div id="auth" class="auth-wrap">
+  <div class="auth-hero">
+    <div class="logo">
+      <svg width="34" height="34" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <circle cx="16" cy="20" r="11" stroke="#B8FFFF" stroke-width="3" fill="none" transform="rotate(-12 16 20)"/>
+        <circle cx="25" cy="20" r="11" stroke="#FFFCAB" stroke-width="3" fill="none" transform="rotate(8 25 20)"/>
+      </svg>
+      <div><div class="word">trak</div><div class="tag">movement therapy</div></div>
+    </div>
+    <div>
+      <h1>Formación trak para fisioterapeutas</h1>
+      <p>Aprende a integrar la rehabilitación digital en tu práctica sin perder el control de lo importante: tu criterio clínico.</p>
+      <div class="hero-quote">
+        <b>trak no diagnostica por su cuenta.</b> Extiende tu criterio justo donde tú no puedes estar: entre una sesión y la siguiente.
+      </div>
+    </div>
+    <div class="hero-foot">Recuperación que se sostiene. Adulto a adulto.</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-box card">
+      <div class="logo" style="margin-bottom:18px">
+        <svg width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <circle cx="16" cy="20" r="11" stroke="#315B5A" stroke-width="3" fill="none" transform="rotate(-12 16 20)"/>
+          <circle cx="25" cy="20" r="11" stroke="#7fc9c5" stroke-width="3" fill="none" transform="rotate(8 25 20)"/>
+        </svg>
+        <div><div class="word">trak</div></div>
+      </div>
+      <h2 id="authTitle">Bienvenido/a</h2>
+      <p class="sub" id="authSub">Accede para empezar tu formación.</p>
+
+      <div class="tabs">
+        <button id="tabLogin" class="on" onclick="setMode('login')">Entrar</button>
+        <button id="tabReg" onclick="setMode('register')">Crear cuenta</button>
+      </div>
+
+      <div id="authMsg"></div>
+
+      <div class="field" id="nameField" style="display:none">
+        <label>Nombre y apellidos</label>
+        <input id="fName" type="text" autocomplete="name" placeholder="Tu nombre" />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input id="fEmail" type="email" autocomplete="email" placeholder="tu@email.com" />
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input id="fPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+
+      <button class="btn full" id="authBtn" onclick="doAuth()">Entrar</button>
+      <p class="sub" style="margin-top:16px;text-align:center" id="switchHint"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="app">
+  <div class="topbar">
+    <div class="logo">
+      <svg width="28" height="28" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <circle cx="16" cy="20" r="11" stroke="#315B5A" stroke-width="3" fill="none" transform="rotate(-12 16 20)"/>
+        <circle cx="25" cy="20" r="11" stroke="#7fc9c5" stroke-width="3" fill="none" transform="rotate(8 25 20)"/>
+      </svg>
+      <div class="word">trak</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="progress-mini">
+      <span id="pctTxt">0%</span>
+      <div class="bar"><i id="barFill"></i></div>
+    </div>
+    <div class="usermenu">
+      <button class="avatar" id="avatar" onclick="toggleMenu()">··</button>
+      <div class="menu" id="menu">
+        <div class="who"><b id="mName">—</b><span id="mEmail">—</span></div>
+        <button onclick="openCert()" id="menuCert">🏆 Mi certificado</button>
+        <button onclick="showAdmin()" id="menuAdmin" style="display:none">📊 Panel de seguimiento</button>
+        <button onclick="goCourse()" id="menuCourse" style="display:none">← Volver al curso</button>
+        <button onclick="signOut()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSE VIEW -->
+  <div class="layout" id="courseView">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main" id="unitArea"></main>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div class="adminwrap hidden" id="adminView"></div>
+</div>
+
+<!-- CERTIFICATE MODAL -->
+<div class="overlay" id="certOverlay">
+  <div class="modal" style="text-align:center">
+    <div class="celebrate">🏆</div>
+    <h3 id="certHead">Tu certificado</h3>
+    <p id="certBody"></p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+      <button class="btn cta" id="certDownload" onclick="downloadCert()">Descargar certificado PDF</button>
+      <button class="btn ghost" onclick="closeCert()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========= CONFIG (claves públicas — seguras en el cliente) ========= */
+const SUPABASE_URL = "https://onoszbueavmjgaclbgff.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ub3N6YnVlYXZtamdhY2xiZ2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDkyMjAsImV4cCI6MjA5Nzc4NTIyMH0.Y1AlB9zSdxs7_w-OMEgrrZTD2oDfWlRxN_6NSRqlNl0";
+const ADMIN_EMAILS = ["marina@trak.es"];
+const COURSE_NAME = "Formación trak";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ========= CONTENIDO DEL CURSO ========= */
+const SECTIONS = [
+ {title:"Contexto", units:[
+   {id:"u1", title:"Evidencia científica y modelo híbrido", type:"content", html:`
+     <p>Antes de prescribir, conviene tener clara una cosa: <strong>la telerehabilitación no es una alternativa de segunda; es la evolución del modelo</strong>, y la evidencia la respalda.</p>
+     <div class="callout"><span class="lab">La evidencia nos respalda</span>
+       <ul>
+         <li><strong>Misma efectividad:</strong> los programas digitales logran niveles de funcionalidad y calidad de vida equivalentes a la fisioterapia 100% manual.</li>
+         <li><strong>Mejora funcional medible:</strong> trak captura datos objetivos de la progresión.</li>
+         <li><strong>Respaldo institucional:</strong> las guías clínicas internacionales ya la incluyen para patologías musculoesqueléticas.</li>
+       </ul>
+     </div>
+     <h3>Beneficios directos (fisio y paciente)</h3>
+     <p>Eficiencia real: ahorro de tiempo de desplazamiento, menos costes operativos y continuidad garantizada (evita el absentismo por viajes, trabajo o clima).</p>
+     <h3>El modelo híbrido es un ecosistema circular</h3>
+     <p>La terapia presencial y la digital se retroalimentan, no compiten: Paciente → Profesional sanitario → Valoración → ciclo Terapia manual/digital → Evaluación final → Alta.</p>
+     <h3>Las 4 fases del ciclo terapéutico</h3>
+     <div class="cards">
+       <div class="minicard"><b>1. Valoración inicial</b><span>Punto de partida presencial.</span></div>
+       <div class="minicard"><b>2. Terapia digital (trak)</b><span>La IA corrige y aporta datos objetivos.</span></div>
+       <div class="minicard"><b>3. Monitoreo y seguimiento</b><span>Continuidad entre sesiones.</span></div>
+       <div class="minicard"><b>4. Terapia manual ajustada</b><span>Según progreso y alertas.</span></div>
+     </div>
+     <p style="font-size:13.5px;color:var(--muted)">Referencia: Muñoz-Tomás, M. T. et al. (2023).</p>`,
+     quiz:{q:"¿Cómo se determina el «Alta» del paciente en el modelo híbrido?", options:[
+       "Automáticamente cuando completa todas las sesiones de la app",
+       "Por la valoración final del profesional sanitario tras la monitorización continua",
+       "Cuando la IA detecta rango articular completo"],
+       answer:1, fb:"El criterio clínico tiene la última palabra: el alta la decide el profesional tras la monitorización continua."}},
+ ]},
+ {title:"Metodología y selección del paciente", units:[
+   {id:"u2", title:"Criterios de inclusión y exclusión", type:"content", html:`
+     <p>No todos los pacientes son candidatos. Seleccionar bien es parte del criterio clínico, no un trámite.</p>
+     <div class="cards">
+       <div class="minicard"><b>✅ Incluir</b><span>Patologías musculoesqueléticas o procesos postquirúrgicos que necesitan seguimiento estrecho o apoyo complementario. Especialmente útil para quienes tienen dificultades de desplazamiento o viven en zonas alejadas.</span></div>
+       <div class="minicard"><b>⛔ Excluir</b><span>Presencia de <em>red flags</em> o patologías no tratables con fisioterapia digital, rechazo al entorno virtual, brecha digital o falta de dispositivos compatibles.</span></div>
+     </div>
+     <div class="callout"><span class="lab">Dato</span><strong>85%</strong> de pacientes resultan incluibles · <strong>15%</strong> quedan excluidos.</div>`,
+     quiz:{q:"¿Cuál de estos pacientes NO sería candidato a fisioterapia digital con trak?", options:[
+       "Paciente postquirúrgico que vive lejos de la clínica",
+       "Paciente con una patología musculoesquelética y buen acceso a dispositivos",
+       "Paciente con red flags o sin dispositivo compatible"],
+       answer:2, fb:"Las red flags, la brecha digital o la falta de dispositivo son criterios de exclusión."}},
+   {id:"u3", title:"Asegurar el éxito del paciente", type:"content", html:`
+     <p>El compromiso del paciente no aparece solo: <strong>lo genera el profesional</strong>.</p>
+     <h4>El médico</h4><p>Propone el nuevo modelo de rehabilitación tras confirmar los criterios de inclusión.</p>
+     <h4>El fisioterapeuta</h4><p>Explica que el tratamiento combina terapia activa en casa con sesiones presenciales (por ejemplo, 3 en clínica + 2 en casa monitorizadas).</p>
+     <h3>Antes de empezar</h3>
+     <p>El paciente debe entender los beneficios: la IA le corrige en tiempo real, hay monitorización constante y el chat interno refuerza el vínculo.</p>
+     <h3>Durante el proceso</h3>
+     <p>Monitorización de alertas, comunicación por chat y fomento de un rol activo del paciente.</p>
+     <h3>Cómo explicar trak a tus pacientes — 5 pasos</h3>
+     <div class="cards">
+       <div class="minicard"><b>1. Presentación y evidencia</b><span>Qué es y por qué funciona.</span></div>
+       <div class="minicard"><b>2. Transmitir tranquilidad</b><span>Validar sus dudas.</span></div>
+       <div class="minicard"><b>3. Poner en valor los beneficios</b><span>Para su vida real.</span></div>
+       <div class="minicard"><b>4. Explicar el proceso</b><span>Email → activación → tutorial de bienvenida → entorno y acción.</span></div>
+       <div class="minicard"><b>5. Beneficios</b><span>Horario flexible, comodidad, contacto constante con el fisio, sin desplazamientos.</span></div>
+     </div>`}
+ ]},
+ {title:"Los 3 pilares básicos", units:[
+   {id:"u4", title:"Cómo usar trak — los 3 pilares", type:"content", html:`
+     <p>El trabajo con trak se ordena en tres pasos.</p>
+     <div class="cards">
+       <div class="minicard"><b>1. Prescripción</b><span>Alta de paciente: email + fecha de nacimiento, dispositivo con SO actualizado (Android/iOS) y conexión a internet.</span></div>
+       <div class="minicard"><b>2. Asignación de protocolo</b><span>Biblioteca de ejercicios filtrable por región, movimiento, material, intensidad o dificultad. Protocolos preguardados y editables.</span></div>
+       <div class="minicard"><b>3. Monitorización</b><span>Revisión de métricas en ~2 minutos.</span></div>
+     </div>
+     <div class="callout"><span class="lab">Recuerda</span>La sesión finaliza cuando el paciente completa la <strong>encuesta final</strong> (nivel de dolor, esfuerzo, mejoría comparativa y comentarios para ti), que llega al panel de «Métricas del paciente».</div>`},
+   {id:"u5", title:"Pilar I — Prescripción", type:"video", video:{len:"6:52", by:"Karlos Solaun"}, html:`
+     <p>Lección en vídeo sobre el proceso completo de prescripción: alta de paciente, biblioteca de ejercicios con filtros avanzados, personalización de parámetros, calendario, escalas clínicas y balances articulares medidos por IA, y guardado/compartido de protocolos.</p>
+     <p style="font-size:13.5px;color:var(--muted)">El vídeo incluye 4 preguntas interactivas (02:53, 04:06, 05:18, 06:50). Está alojado en TalentLMS; aquí puedes incrustar el enlace cuando lo tengas.</p>`},
+   {id:"u6", title:"Fases de tratamiento", type:"content", html:`
+     <p>El avance entre fases depende del <strong>nivel de dolor</strong>, medido con la escala EVA. A menos dolor, más autonomía del paciente y menos control directo.</p>
+     <div class="cards">
+       <div class="minicard"><b>Fase temprana</b><span>Control máximo: balances, cuestionarios, grabaciones y feedback detallado. Monitoreo semanal de 15'.</span></div>
+       <div class="minicard"><b>Fase intermedia</b><span>El control disminuye: menos frecuencia e intensidad. Monitoreo semanal de 10'.</span></div>
+       <div class="minicard"><b>Fase final</b><span>Control mínimo y máxima autonomía: solo evaluación final y sesión de cierre.</span></div>
+     </div>
+     <div class="callout"><span class="lab">Idea clave</span>El dolor es el marcador que te dice cuánto control mantener en cada momento.</div>`},
+   {id:"u7", title:"Pilar II — Rehabilitación (Patient Journey)", type:"content", html:`
+     <p>El recorrido del paciente hasta el alta, en 9 pasos:</p>
+     <ul>
+       <li>1. El paciente acepta el tratamiento.</li>
+       <li>2. Accede a la plataforma.</li>
+       <li>3. Ve el vídeo de bienvenida.</li>
+       <li>4. Tiene su rutina lista.</li>
+       <li>5. Recibe notificación diaria.</li>
+       <li>6. Seguimientos (presencial o videollamada).</li>
+       <li>7. Se acuerda una nueva rutina.</li>
+       <li>8. Duración: de semanas a meses.</li>
+       <li>9. El fisioterapeuta genera el alta.</li>
+     </ul>
+     <div class="callout"><span class="lab">Recuerda</span>La sesión solo cuenta si el paciente responde la encuesta: dolor, esfuerzo, sensación de mejora y comentarios.</div>`},
+   {id:"u8", title:"Pilar III — Monitorización", type:"video", video:{len:"4:23", by:"Karlos Solaun"}, html:`
+     <p>Lección en vídeo sobre el panel de control inteligente: orden de prioridad de pacientes, historial de alertas, chat integrado y ajuste del programa en tiempo real.</p>
+     <p style="font-size:13.5px;color:var(--muted)">El vídeo incluye 3 preguntas interactivas (01:25, 03:38, 03:46). Está alojado en TalentLMS; aquí puedes incrustar el enlace cuando lo tengas.</p>`}
+ ]},
+ {title:"Beneficios de la IA", units:[
+   {id:"u9", title:"Beneficios de la IA", type:"content", html:`
+     <p>trak rompe la barrera de la distancia y ofrece supervisión técnica que antes solo era posible de forma presencial.</p>
+     <h3>Beneficios para el paciente</h3>
+     <ul>
+       <li>Correcciones durante la ejecución.</li>
+       <li>Medidas articulares objetivas.</li>
+       <li>Tiempo frente a la cámara.</li>
+       <li>Tiempo en movimiento frente a la cámara.</li>
+     </ul>
+     <div class="callout"><span class="lab">Diferencia clave</span>El <strong>tiempo frente a la cámara</strong> mide la duración total de conexión; el <strong>tiempo en movimiento</strong> mide el trabajo físico real y efectivo: la dosis exacta y la detección de fatiga o distracciones.</div>
+     <h3>Acceso gracias a la tecnología</h3>
+     <p>Accesibilidad para zonas remotas o con movilidad reducida, y más motivación y adherencia mediante gamificación y progreso visual.</p>`,
+     quiz:{q:"¿Qué mide el «tiempo en movimiento» frente a la cámara?", options:[
+       "El total de minutos que el paciente tiene la app abierta",
+       "El trabajo físico real y efectivo: la dosis ejercida y la fatiga",
+       "El número de veces que el paciente abre la cámara"],
+       answer:1, fb:"Exacto: el tiempo en movimiento refleja la dosis real de trabajo, no solo la conexión."}},
+   {id:"u10", title:"Privacidad y seguridad", type:"content", html:`
+     <p>trak es un <strong>dispositivo médico de Clase I con Marcado CE</strong>, bajo estándares GDPR e ISO 27001 y cifrado SHA256.</p>
+     <div class="cards">
+       <div class="minicard"><b>Marcado CE</b><span>Dispositivo médico Clase I (Directiva 93/42/EEC, Art. 120 del Reglamento UE 2017/745 y 2023/607).</span></div>
+       <div class="minicard"><b>Cifrado</b><span>SHA256, acceso solo por conexiones seguras (VPN/SSH), envíos con TLS.</span></div>
+       <div class="minicard"><b>GDPR</b><span>Certificación de protección de datos.</span></div>
+       <div class="minicard"><b>Servidores ISO 27001</b><span>En AWS, con ISO/IEC 27001, 27017, SOC 1/2/3, PCI DSS, HIPAA.</span></div>
+     </div>
+     <h3>Transparencia y control del paciente</h3>
+     <p>El acceso a las grabaciones está restringido y el paciente puede denegar la cámara en cualquier momento.</p>
+     <h3>Soporte y gestión de alertas</h3>
+     <p>Servicio técnico ágil vía <strong>soporte@trak.es</strong> o desde la app (incidencias con la app, errores de visionado, errores del sistema).</p>
+     <h4>Cómo reportar incidencias</h4>
+     <p>Distingue entre el <strong>proceso clínico del paciente</strong> (criterio clínico / protocolo del centro) y la <strong>incidencia técnica de trak</strong> (fallos de software, contenido o instrucciones). Y dentro de lo técnico, si hay o no posible afectación clínica.</p>`,
+     quiz:{q:"Detectas una RED FLAG durante el seguimiento de un paciente. ¿Qué haces?", options:[
+       "Esperar a la siguiente sesión para confirmarlo",
+       "Derivar al paciente y contactar con soporte para activar el protocolo de seguridad",
+       "Aumentar la intensidad del ejercicio para descartar"],
+       answer:1, fb:"Ante una red flag: deriva al paciente y contacta con soporte para activar el protocolo de seguridad."}}
+ ]},
+ {title:"Entrenamiento clínico y reto", units:[
+   {id:"u11", title:"Bloque de entrenamiento clínico", type:"content", html:`
+     <p>Antes del reto final, dos escenarios clínicos para aplicar todo lo anterior:</p>
+     <div class="cards">
+       <div class="minicard"><b>Caso 1</b><span>Latigazo cervical grado II.</span></div>
+       <div class="minicard"><b>Caso 2</b><span>Lumbalgia crónica.</span></div>
+     </div>`},
+   {id:"u12", title:"Caso clínico 1 — Latigazo cervical grado II", type:"content", html:`
+     <p><strong>Paciente:</strong> hombre de 38 años. Dolor cervical con movilidad limitada tras una colisión por alcance; hormigueo en manos y dolor de cabeza. Señales de alarma descartadas. <strong>Diagnóstico:</strong> latigazo cervical grado II (agudo).</p>
+     <h4>Objetivos</h4>
+     <p>Reducir dolor y mejorar funcionalidad, manejo del dolor y educación, restaurar rango de movimiento y control motor.</p>
+     <h4>Primera sesión — valoración</h4>
+     <p>Presencial + escalas trak (CS catastrofismo, TSK-11 kinesiofobia, NDI) + balances trak (rotación, inclinación, flexión y extensión cervical, flexión de hombro). Prescripción desde la Protocol Library.</p>
+     <h4>Monitorización</h4>
+     <p>Revisar el panel de notificaciones, revisar las grabaciones de ejercicios con dolor y comunicar por chat.</p>
+     <h4>Progresión</h4>
+     <p>Usar las grabaciones iniciales para evaluar, analizar y detectar compensaciones.</p>
+     <h4>Modificar ejercicios</h4>
+     <p>Aumentar series/repeticiones, cambiar posiciones e incorporar materiales (bandas elásticas), siempre según la evolución del dolor.</p>`},
+   {id:"u13", title:"Caso clínico 2 — Lumbalgia crónica", type:"content", html:`
+     <p><strong>Paciente:</strong> hombre de 45 años. Dolor lumbar de más de 6 meses, vida sedentaria, mejora al pasear al perro. <strong>Diagnóstico:</strong> dolor crónico lumbar.</p>
+     <h4>Objetivos</h4>
+     <p>Reducir dolor y mejorar funcionalidad, educación y manejo del dolor, fortalecimiento del core.</p>
+     <h4>Valoración</h4>
+     <p>Presencial + escalas (PCS catastrofismo, TSK-11, OMPQ, Roland-Morris, Oswestry) + balances (flexión de cadera, distancia dedos-suelo, inclinación lumbar, abducción de cadera).</p>
+     <h4>Monitorización (continua, cada sesión)</h4>
+     <p>Revisar notificaciones y escalas semanales.</p>
+     <h4>Progresión y ajustes</h4>
+     <p>Seguimiento del progreso subjetivo por chat; añadir ejercicios de core y repeticiones; alternar protocolos.</p>`,
+     quiz:{q:"El paciente mejora y reduce su dolor. ¿Cuál es el siguiente paso adecuado?", options:[
+       "Dar el alta inmediata",
+       "Avanzar a la fase intermedia aumentando la carga con «Strong Back» o material elástico",
+       "Repetir indefinidamente el mismo protocolo"],
+       answer:1, fb:"Al mejorar, se avanza a fase intermedia aumentando la carga (p. ej. «Strong Back» o material elástico)."}},
+   {id:"u14", title:"Reto práctico final", type:"task", html:`
+     <p>Es el momento de aplicarlo en la plataforma real. <strong>Configura un paciente y prescríbele un protocolo en trak.</strong></p>
+     <h4>Acceso</h4><p>Inicia sesión en trak.</p>
+     <h4>Creación de paciente</h4><p>Crea un paciente ficticio: «Paciente Prueba Talent».</p>
+     <div class="callout"><span class="lab">Actividad 1 — Prescripción desde cero</span>Crea un protocolo nuevo usando los filtros de búsqueda, edita todas las variables de cada ejercicio (series, repeticiones, descanso, días) y adjunta una captura.</div>
+     <div class="callout"><span class="lab">Actividad 2 — Uso de plantillas</span>Asigna un protocolo guardado (plantilla), edítalo (añade o elimina un ejercicio) para hacerlo único y adjunta una captura.</div>
+     <p style="font-size:13.5px;color:var(--muted)">Realiza el reto en la plataforma trak y, cuando lo termines, marca esta unidad como completada para finalizar tu formación.</p>`}
+ ]}
+];
+
+/* aplanar unidades */
+const UNITS=[]; SECTIONS.forEach((s,si)=>s.units.forEach(u=>UNITS.push({...u, section:s.title, si})));
+const TOTAL=UNITS.length;
+
+/* ========= ESTADO ========= */
+let user=null, profileName="", completed=new Set(), current=0, isAdmin=false;
+
+/* ========= AUTH UI ========= */
+let mode='login';
+function setMode(m){
+  mode=m;
+  document.getElementById('tabLogin').classList.toggle('on',m==='login');
+  document.getElementById('tabReg').classList.toggle('on',m==='register');
+  document.getElementById('nameField').style.display = m==='register'?'block':'none';
+  document.getElementById('authBtn').textContent = m==='register'?'Crear cuenta':'Entrar';
+  document.getElementById('authTitle').textContent = m==='register'?'Crea tu cuenta':'Bienvenido/a';
+  document.getElementById('authSub').textContent = m==='register'?'Regístrate para empezar tu formación.':'Accede para continuar tu formación.';
+  document.getElementById('fPass').setAttribute('autocomplete', m==='register'?'new-password':'current-password');
+  msg('');
+}
+function msg(t,type){const e=document.getElementById('authMsg');e.innerHTML=t?`<div class="msg ${type||'err'}">${t}</div>`:'';}
+
+async function doAuth(){
+  const email=document.getElementById('fEmail').value.trim();
+  const pass=document.getElementById('fPass').value;
+  const name=document.getElementById('fName').value.trim();
+  if(!email||!pass){msg('Completa email y contraseña.');return;}
+  const btn=document.getElementById('authBtn'); btn.disabled=true; btn.textContent='Un momento…';
+  try{
+    if(mode==='register'){
+      if(!name){msg('Dinos tu nombre para el certificado.');btn.disabled=false;btn.textContent='Crear cuenta';return;}
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+      if(error)throw error;
+      if(data.session){ await onLogged(); }
+      else { msg('Cuenta creada. Revisa tu email para confirmar y luego entra.','ok'); setMode('login'); }
+    }else{
+      const {error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+      await onLogged();
+    }
+  }catch(e){ msg(traducir(e.message)); }
+  finally{ btn.disabled=false; btn.textContent= mode==='register'?'Crear cuenta':'Entrar'; }
+}
+function traducir(m){
+  if(/Invalid login/i.test(m))return'Email o contraseña incorrectos.';
+  if(/already registered/i.test(m))return'Ese email ya tiene cuenta. Entra con tu contraseña.';
+  if(/Password should be/i.test(m))return'La contraseña debe tener al menos 6 caracteres.';
+  if(/Email not confirmed/i.test(m))return'Confirma tu email antes de entrar (revisa tu bandeja).';
+  return m;
+}
+
+/* ========= SESIÓN ========= */
+async function boot(){
+  const {data}=await sb.auth.getSession();
+  if(data.session){ await onLogged(); }
+}
+async function onLogged(){
+  const {data}=await sb.auth.getUser(); user=data.user;
+  profileName = user.user_metadata?.full_name || user.email.split('@')[0];
+  isAdmin = ADMIN_EMAILS.includes((user.email||'').toLowerCase());
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('avatar').textContent = initials(profileName);
+  document.getElementById('mName').textContent = profileName;
+  document.getElementById('mEmail').textContent = user.email;
+  document.getElementById('menuAdmin').style.display = isAdmin?'block':'none';
+  await markCourseStarted();
+  await loadProgress();
+  renderSidebar(); renderUnit(0); updateBar();
+}
+function initials(n){return n.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();}
+
+async function loadProgress(){
+  completed=new Set();
+  const {data}=await sb.from('progress').select('module_id,status').eq('user_id',user.id);
+  (data||[]).forEach(r=>{ if(r.status==='completed' && r.module_id!=='__course__') completed.add(r.module_id); });
+}
+async function markCourseStarted(){
+  await sb.from('progress').upsert({user_id:user.id,module_id:'__course__',status:'started',updated_at:new Date().toISOString()},{onConflict:'user_id,module_id',ignoreDuplicates:false});
+}
+async function markCompleted(moduleId){
+  completed.add(moduleId);
+  await sb.from('progress').upsert({user_id:user.id,module_id:moduleId,status:'completed',completed_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:'user_id,module_id'});
+  if(completed.size>=TOTAL){
+    await sb.from('progress').upsert({user_id:user.id,module_id:'__course__',status:'completed',completed_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:'user_id,module_id'});
+  }
+}
+
+/* ========= RENDER ========= */
+function renderSidebar(){
+  let h='';
+  SECTIONS.forEach(s=>{
+    h+=`<div class="sec-title">${s.title}</div>`;
+    s.units.forEach(u=>{
+      const idx=UNITS.findIndex(x=>x.id===u.id);
+      const done=completed.has(u.id);
+      h+=`<div class="unit-link ${idx===current?'on':''}" onclick="renderUnit(${idx})">
+        <span class="tick ${done?'done':''}">${done?'✓':''}</span>
+        <span>${u.title}</span></div>`;
+    });
+  });
+  document.getElementById('sidebar').innerHTML=h;
+}
+
+function renderUnit(i){
+  current=i; const u=UNITS[i];
+  const done=completed.has(u.id);
+  const typePill = u.type==='video'?'<span class="pill video">▶ Vídeo · '+u.video.len+' · '+u.video.by+'</span>'
+                 : u.type==='task'?'<span class="pill task">🎯 Reto práctico</span>'
+                 : '<span class="pill">📘 Lección</span>';
+  let videoBox = u.type==='video'?`<div class="videobox"><div class="play">▶</div><div><b>Vídeo formativo (${u.video.len})</b><br><span>Narrado por ${u.video.by} · disponible en TalentLMS</span></div></div>`:'';
+  let quizHtml='';
+  if(u.quiz){
+    quizHtml=`<div class="quiz" id="quiz"><div class="q">${u.quiz.q}</div>`+
+      u.quiz.options.map((o,k)=>`<button class="opt" onclick="answer(${k})">${o}</button>`).join('')+
+      `<div class="fb" id="qfb"></div></div>`;
+  }
+  document.getElementById('unitArea').innerHTML=`
+    <div class="crumbs">${u.section} · Unidad ${i+1} de ${TOTAL}</div>
+    <h2 class="unit-h">${u.title}</h2>
+    ${typePill}
+    ${videoBox}
+    <div class="content">${u.html}</div>
+    ${quizHtml}
+    <div class="unit-foot">
+      <button class="btn ghost sm" onclick="renderUnit(${Math.max(0,i-1)})" ${i===0?'disabled':''}>← Anterior</button>
+      <div class="spacer"></div>
+      <button class="btn ${done?'ghost':''}" id="completeBtn" onclick="completeUnit()">${done?'✓ Completada':'Marcar como completada'}</button>
+      <button class="btn cta sm" onclick="renderUnit(${Math.min(TOTAL-1,i+1)})" ${i===TOTAL-1?'disabled':''}>Siguiente →</button>
+    </div>`;
+  renderSidebar();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+const ANS={};
+function answer(k){
+  const u=UNITS[current]; const correct=u.quiz.answer;
+  const opts=document.querySelectorAll('#quiz .opt');
+  opts.forEach((o,idx)=>{ o.classList.add('dim'); o.disabled=true;
+    if(idx===correct)o.classList.add('correct');
+    if(idx===k&&k!==correct)o.classList.add('wrong');
+  });
+  const fb=document.getElementById('qfb');
+  fb.className='fb show '+(k===correct?'good':'bad');
+  fb.textContent=(k===correct?'✓ Correcto. ':'Revisa: ')+u.quiz.fb;
+}
+async function completeUnit(){
+  const u=UNITS[current];
+  if(completed.has(u.id)) return;
+  const btn=document.getElementById('completeBtn'); btn.disabled=true; btn.textContent='Guardando…';
+  await markCompleted(u.id);
+  renderSidebar(); updateBar();
+  btn.disabled=false; btn.textContent='✓ Completada'; btn.classList.add('ghost');
+  if(completed.size>=TOTAL){ setTimeout(openCert,500); }
+  else if(current<TOTAL-1){ setTimeout(()=>renderUnit(current+1),450); }
+}
+function updateBar(){
+  const pct=Math.round(completed.size/TOTAL*100);
+  document.getElementById('barFill').style.width=pct+'%';
+  document.getElementById('pctTxt').textContent=pct+'%';
+}
+
+/* ========= MENÚ / SESIÓN ========= */
+function toggleMenu(){document.getElementById('menu').classList.toggle('open');}
+document.addEventListener('click',e=>{ if(!e.target.closest('.usermenu'))document.getElementById('menu').classList.remove('open'); });
+async function signOut(){ await sb.auth.signOut(); location.reload(); }
+function goCourse(){ document.getElementById('adminView').classList.add('hidden'); document.getElementById('courseView').style.display='grid'; document.getElementById('menuCourse').style.display='none'; toggleMenu(); }
+
+/* ========= CERTIFICADO ========= */
+function openCert(){
+  const ok=completed.size>=TOTAL;
+  document.getElementById('certHead').textContent = ok?'¡Formación completada! 🎉':'Tu certificado';
+  document.getElementById('certBody').innerHTML = ok
+    ? `Enhorabuena, <b>${profileName}</b>. Has completado <b>${COURSE_NAME}</b>. Descarga tu certificado.`
+    : `Aún te faltan <b>${TOTAL-completed.size}</b> unidades por completar. Cuando termines las ${TOTAL}, podrás descargar tu certificado.`;
+  document.getElementById('certDownload').style.display = ok?'inline-flex':'none';
+  document.getElementById('certOverlay').classList.add('open');
+  document.getElementById('menu').classList.remove('open');
+}
+function closeCert(){document.getElementById('certOverlay').classList.remove('open');}
+function downloadCert(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'});
+  const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight();
+  doc.setFillColor(251,254,253); doc.rect(0,0,W,H,'F');
+  doc.setFillColor(49,91,90); doc.rect(0,0,W,14,'F'); doc.rect(0,H-14,W,14,'F');
+  doc.setDrawColor(204,235,235); doc.setLineWidth(2); doc.rect(34,34,W-68,H-68);
+  // marca
+  doc.setDrawColor(49,91,90); doc.setLineWidth(3);
+  doc.circle(W/2-12,108,16); doc.setDrawColor(127,201,197); doc.circle(W/2+6,108,16);
+  doc.setFont('helvetica','bold'); doc.setTextColor(29,58,57); doc.setFontSize(24);
+  doc.text('trak',W/2,150,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(93,112,111);
+  doc.text('movement therapy',W/2,166,{align:'center'});
+  doc.setFontSize(13); doc.setTextColor(93,112,111);
+  doc.text('CERTIFICADO DE FORMACIÓN',W/2,212,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(13); doc.setTextColor(60,80,79);
+  doc.text('Se certifica que',W/2,250,{align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(34); doc.setTextColor(49,91,90);
+  doc.text(profileName,W/2,294,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(14); doc.setTextColor(60,80,79);
+  doc.text('ha completado con éxito el programa de formación',W/2,330,{align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(29,58,57);
+  doc.text('"'+COURSE_NAME+'" para fisioterapeutas',W/2,360,{align:'center'});
+  const f=new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(12); doc.setTextColor(93,112,111);
+  doc.text('Fecha de finalización: '+f,W/2,400,{align:'center'});
+  doc.setDrawColor(49,91,90); doc.setLineWidth(1); doc.line(W/2-90,H-90,W/2+90,H-90);
+  doc.setFontSize(11); doc.text('Equipo trak',W/2,H-72,{align:'center'});
+  doc.save('Certificado_trak_'+profileName.replace(/\s+/g,'_')+'.pdf');
+}
+
+/* ========= ADMIN ========= */
+async function showAdmin(){
+  toggleMenu();
+  document.getElementById('courseView').style.display='none';
+  const v=document.getElementById('adminView'); v.classList.remove('hidden');
+  document.getElementById('menuCourse').style.display='block';
+  v.innerHTML='<p style="color:var(--muted)">Cargando datos…</p>';
+  const {data:profiles}=await sb.from('profiles').select('id,full_name,email,created_at');
+  const {data:prog}=await sb.from('progress').select('user_id,module_id,status,completed_at');
+  const byUser={};
+  (prog||[]).forEach(r=>{ (byUser[r.user_id]=byUser[r.user_id]||[]).push(r); });
+  let started=0,done=0,rows='';
+  (profiles||[]).forEach(p=>{
+    const rs=byUser[p.id]||[];
+    const units=rs.filter(r=>r.status==='completed'&&r.module_id!=='__course__').length;
+    const courseDone=rs.some(r=>r.module_id==='__course__'&&r.status==='completed');
+    const hasStarted=rs.length>0;
+    if(hasStarted)started++; if(courseDone)done++;
+    const badge=courseDone?'<span class="badge done">Completado</span>':units>0?'<span class="badge prog">En curso</span>':'<span class="badge none">Iniciado</span>';
+    rows+=`<tr><td><b>${p.full_name||'—'}</b></td><td>${p.email||''}</td><td>${units}/${TOTAL}</td><td>${badge}</td></tr>`;
+  });
+  v.innerHTML=`
+    <h2 style="font-size:26px;margin:0 0 4px">Panel de seguimiento</h2>
+    <p style="color:var(--muted);margin:0 0 6px">Formación trak · fisioterapeutas</p>
+    <div class="statgrid">
+      <div class="stat"><div class="n">${(profiles||[]).length}</div><div class="l">Personas registradas</div></div>
+      <div class="stat"><div class="n">${started}</div><div class="l">Han iniciado</div></div>
+      <div class="stat"><div class="n">${done}</div><div class="l">Han completado</div></div>
+      <div class="stat"><div class="n">${(profiles||[]).length?Math.round(done/(profiles||[]).length*100):0}%</div><div class="l">Tasa de finalización</div></div>
+    </div>
+    <table><thead><tr><th>Nombre</th><th>Email</th><th>Progreso</th><th>Estado</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="4" style="color:var(--muted)">Aún no hay registros.</td></tr>'}</tbody></table>`;
+}
+
+/* init */
+setMode('login');
+boot();
+</script>
+</body>
+</html>
